@@ -1,0 +1,16 @@
+If this is turned on in Windows Task Scheduler, it will run according to your configuration or manually using shell.
+
+$sourceFolder = "C:\xxxx"
+$dateThreshold = (Get-Date).AddDays(-7)
+
+Get-ChildItem -Path $sourceFolder -Recurse -Directory | ForEach-Object {
+    $subFolder = $_
+    $zipFileName = "Old_log" + $subFolder.Name + "_" + (Get-Date -Format "yyyyMMdd") + ".zip"
+    $filesToCompress = Get-ChildItem -Path $subFolder.FullName -File -Filter "*.log" | Where-Object { $_.LastWriteTime -lt $dateThreshold }
+
+    if ($filesToCompress.Count -gt 0) {
+        $zipFilePath = Join-Path $subFolder.FullName $zipFileName
+        Compress-Archive -Path $filesToCompress.FullName -DestinationPath $zipFilePath -Force
+        Remove-Item -Path $filesToCompress.FullName -Force
+    }
+}
