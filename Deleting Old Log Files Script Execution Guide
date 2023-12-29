@@ -1,0 +1,61 @@
+This script is written to help manage log files by deleting files older than a specified date. Follow these steps to execute the script in various directories.
+Step 1: Navigate to the Log Directory
+
+    Open a terminal on the server where the log directories are located.
+
+    Change the directory to the main log directory using the cd command:
+
+cd /apphome/apps/log
+Step 2: Download the Script (if not already available)
+
+    If the script is not already on the server, you can create a new file using a text editor or copy it from another source.
+
+    Save the script with an appropriate name, for example, clear_log.sh or delete_logs.sh etc….
+
+Step 3: Make the Script Executable
+
+    Confirm the script has the executable permission. If not, run the following command:
+
+chmod +x clear_log.sh
+Step 4: Execute the Script in Each Sub-directory
+
+    Execute the script in each subdirectory using a loop. For example:
+
+#!/bin/bash
+
+log_directory="/apphome/apps/log"
+
+# Loop through each subdirectory in /apphome/apps/log
+for subdirectory in "$log_directory"/*; do
+    if [ -d "$subdirectory" ]; then
+        echo "Processing logs in: $subdirectory"
+    
+    # Change to the subdirectory
+    cd "$subdirectory"
+
+    # Set the current date and calculate the date from how many days ago
+    current_date="2023-12-29" #Please change date********
+    three_days_ago="2023-12-26" #Please change date*******
+
+    # Here I gave Loop through .log and .gz files in the subdirectory, you can change it based on your need:
+    for file in *.log *.gz; do
+        if [ -f "$file" ]; then
+            # Extract the date part of the filename (assuming it follows the YYYYMMDD pattern)
+            file_date=$(echo "$file" | grep -oE "[0-9]{8}")
+
+            # Compare the date and delete files older than three days (I scheduled it for 3 days) it may changes as per your requirement 
+            if [ "$file_date" -lt "$(date -d "$three_days_ago" +"%Y%m%d")" ]; then
+                rm -f "$file"
+                echo "Deleted: $file"
+            fi
+        fi
+    done
+
+    # Return to the original directory
+    cd "$log_directory"
+fi
+done
+
+This loop goes through each subdirectory, changes into it, and executes the script.
+
+rm command it permanently delete the file.
